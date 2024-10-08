@@ -1,10 +1,16 @@
 <?php
+require '/var/www/vendor/autoload.php';
+use RobThree\Auth\TwoFactorAuth;
+
+$dotenv = \Dotenv\Dotenv::createImmutable('/var/www/');
+$dotenv->load();
+
 session_start();
 
 // Database connectie
 $servername = "localhost";
 $username = "root";
-$password = "root";
+$password = $_ENV['DB_PASSWORD_ROOT'];
 $database = "project5";
 
 $conn = new mysqli($servername, $username, $password, $database);
@@ -15,9 +21,10 @@ if ($conn->connect_error) {
 
 $gebruikersnaam = $_POST['gebruikersnaam'] ?? '';
 $wachtwoord = $_POST['wachtwoord'] ?? '';
+$mfaCode = $_POST['mfa_code'] ?? ''; // Optioneel MFA-code veld
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($gebruikersnaam) && !empty($wachtwoord)) {
-    $sql = "SELECT gebruiker_id, wachtwoord FROM gebruikers WHERE gebruikersnaam = ?";
+    $sql = "SELECT gebruiker_id, wachtwoord, mfa_secret FROM gebruikers WHERE gebruikersnaam = ?";
     $stmt = $conn->prepare($sql);
     if ($stmt === false) {
         die("Fout bij het voorbereiden van de statement: " . $conn->error);
@@ -28,14 +35,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($gebruikersnaam) && !empty($w
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
-        $stmt->bind_result($gebruiker_id, $hashedWachtwoord);
+        $stmt->bind_result($gebruiker_id, $hashedWachtwoord, $mfaSecret);
         $stmt->fetch();
 
         if (password_verify($wachtwoord, $hashedWachtwoord)) {
-            $_SESSION['gebruikersnaam'] = $gebruikersnaam;
-            $_SESSION['gebruiker_id'] = $gebruiker_id;
-            header("Location: account.php");
-            exit();
+            // MFA controleren indien geconfigureerd
+            if (!empty($mfaSecret)) {
+                // MFA-secret aanwezig, MFA-code vereist
+                $tfa = new TwoFactorAuth('project5');
+                if (!empty($mfaCode)) {
+                    if ($tfa->verifyCode($mfaSecret, $mfaCode, 2)) {
+                        // MFA-code is correct, login succesvol
+                        $_SESSION['gebruikersnaam'] = $gebruikersnaam;
+                        $_SESSION['gebruiker_id'] = $gebruiker_id;
+                        $_SESSION['user_logged_in'] = 1;
+                        $_SESSION['mfa_secret'] = $mfaSecret; // Sla MFA-secret op in sessie
+                        header("Location: account.php");
+                        exit();
+                    } else {
+                        $foutmelding = "Ongeldige MFA-code.";
+                    }
+                } else {
+                    $foutmelding = "MFA-code vereist.";
+                }
+            } else {
+                // Geen MFA geconfigureerd, login succesvol
+                $_SESSION['gebruikersnaam'] = $gebruikersnaam;
+                $_SESSION['gebruiker_id'] = $gebruiker_id;
+                $_SESSION['user_logged_in'] = 1;
+                header("Location: account.php");
+                exit();
+            }
         } else {
             $foutmelding = "Ongeldige gebruikersnaam of wachtwoord.";
         }
@@ -67,6 +97,10 @@ $conn->close();
             <div class="form-group">
                 <label for="wachtwoord">Wachtwoord</label>
                 <input type="password" class="form-control" id="wachtwoord" name="wachtwoord" required>
+            </div>
+            <div class="form-group">
+                <label for="mfa_code">MFA code (als van toepassing)</label>
+                <input type="text" class="form-control" id="mfa_code" name="mfa_code">
             </div>
             <p class="text-danger"><?php echo isset($foutmelding) ? $foutmelding : ""; ?></p>
             <button type="submit" class="btn btn-primary">Inloggen</button>
