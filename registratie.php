@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // exit();
         } else {
             echo "<script>console.log('Keuze: *n*');</script>"; // Log de keuze naar de console
-            // header("Location: login.php"); // Anders naar de loginpagina
+            header("Location: login.php"); // Anders naar de loginpagina
             // exit();
         }
     } else {
