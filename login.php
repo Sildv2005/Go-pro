@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($gebruikersnaam) && !empty($w
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
-        $stmt->bind_result($gebruiker_id, $hashedWachtwoord, $mfaSecret);
+        $stmt->bind_result($gebruiker_id, $hashedWachtwoord);
         $stmt->fetch();
 
         if (password_verify($wachtwoord, $hashedWachtwoord)) {
