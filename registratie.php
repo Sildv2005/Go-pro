@@ -1,38 +1,29 @@
 <?php
+// Connect to the SQLite3 database
+$db = new SQLite3('/var/www/Go-pro/database.sqlite3');  // Update with the actual path to your .sqlite3 file
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Database connectie
-    $servername = "localhost";
-    $username = "root";
-    $password = "8BF54eq$%gpXTBZ4";
-    $database = "project5";
-
-    $conn = new mysqli($servername, $username, $password, $database);
-
-    if ($conn->connect_error) {
-        die("Connectie mislukt: " . $conn->connect_error);
-    }
-
-    // Haal de gegevens op uit het formulier
+    // Get form data
     $gebruikersnaam = $_POST['gebruikersnaam'];
     $wachtwoord = password_hash($_POST['wachtwoord'], PASSWORD_DEFAULT);
-    // Voeg de gebruiker toe aan de database
-    $sql = "INSERT INTO gebruikers (gebruikersnaam, wachtwoord) VALUES (?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $gebruikersnaam, $wachtwoord);
+
+    // Insert user into database
+    $sql = "INSERT INTO gebruikers (gebruikersnaam, wachtwoord) VALUES (:gebruikersnaam, :wachtwoord)";
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(':gebruikersnaam', $gebruikersnaam, SQLITE3_TEXT);
+    $stmt->bindValue(':wachtwoord', $wachtwoord, SQLITE3_TEXT);
 
     if ($stmt->execute()) {
-        // Zet gebruiker_id in sessie voor het MFA-proces
         session_start();
-        $_SESSION['gebruiker_id'] = $stmt->insert_id;
+        $_SESSION['gebruiker_id'] = $db->lastInsertRowID();
         $_SESSION['gebruikersnaam'] = $gebruikersnaam;
-
+        header("Location: account.php");
     } else {
         echo "Fout bij het registreren van de gebruiker. Probeer het later opnieuw.";
     }
-
-    $stmt->close();
-    $conn->close();
 }
+
+$db->close();
 ?>
 
 <!DOCTYPE html>
@@ -54,7 +45,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="wachtwoord">Wachtwoord</label>
                 <input type="password" class="form-control" id="wachtwoord" name="wachtwoord" required>
             </div>
-            <button type="submit" name="submit_mfa" class="btn btn-secondary">Toon keuze in console</button>
             <button type="submit" class="btn btn-primary">Registreren</button>
         </form>
         <p class="mt-3">Heeft u al een account? <a href="login.php">Log hier in</a></p>

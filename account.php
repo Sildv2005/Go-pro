@@ -1,30 +1,15 @@
 <?php
 session_start();
 
-//Controleer of de gebruiker is ingelogd
+// Check if the user is logged in
 if (!isset($_SESSION['gebruikersnaam'])) {
     header("Location: login.php");
     exit();
 }
 
-// Database connectie
-$servername = "localhost";
-$username = "root";
-$password = "8BF54eq$%gpXTBZ4";
-$database = "project5";
-
-$conn = new mysqli($servername, $username, $password, $database);
-
-if ($conn->connect_error) {
-    die("Connectie mislukt: " . $conn->connect_error);
-}
-
-// Haal de gebruiker_id en gebruikersnaam uit de sessie
+// Get the username and user ID from the session
 $gebruikersnaam = $_SESSION['gebruikersnaam'];
 $gebruiker_id = $_SESSION['gebruiker_id'];
-
-// Sluit de database verbinding
-$conn->close();
 ?>
 
 <!DOCTYPE html>

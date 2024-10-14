@@ -1,39 +1,25 @@
 <?php
 session_start();
 
-// Database connectie
-$servername = "localhost";
-$username = "root";
-$password = "8BF54eq$%gpXTBZ4";
-$database = "project5";
-
-$conn = new mysqli($servername, $username, $password, $database);
-
-if ($conn->connect_error) {
-    die("Connectie mislukt: " . $conn->connect_error);
-}
-
 $gebruikersnaam = $_POST['gebruikersnaam'] ?? '';
 $wachtwoord = $_POST['wachtwoord'] ?? '';
 
+// Connect to the SQLite3 database
+$db = new SQLite3('/var/www/Go-pro/database.sqlite3');  // Update with the actual path to your .sqlite3 file
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($gebruikersnaam) && !empty($wachtwoord)) {
-    $sql = "SELECT gebruiker_id, wachtwoord FROM gebruikers WHERE gebruikersnaam = ?";
-    $stmt = $conn->prepare($sql);
-    if ($stmt === false) {
-        die("Fout bij het voorbereiden van de statement: " . $conn->error);
-    }
+    $sql = "SELECT gebruiker_id, wachtwoord FROM gebruikers WHERE gebruikersnaam = :gebruikersnaam";
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(':gebruikersnaam', $gebruikersnaam, SQLITE3_TEXT);
+    
+    $result = $stmt->execute();
+    $user = $result->fetchArray(SQLITE3_ASSOC);
 
-    $stmt->bind_param("s", $gebruikersnaam);
-    $stmt->execute();
-    $stmt->store_result();
-
-    if ($stmt->num_rows > 0) {
-        $stmt->bind_result($gebruiker_id, $hashedWachtwoord);
-        $stmt->fetch();
-
+    if ($user) {
+        $hashedWachtwoord = $user['wachtwoord'];
         if (password_verify($wachtwoord, $hashedWachtwoord)) {
             $_SESSION['gebruikersnaam'] = $gebruikersnaam;
-            $_SESSION['gebruiker_id'] = $gebruiker_id;
+            $_SESSION['gebruiker_id'] = $user['gebruiker_id'];
             $_SESSION['user_logged_in'] = 1;
             header("Location: account.php");
             exit();
@@ -43,11 +29,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($gebruikersnaam) && !empty($w
     } else {
         $foutmelding = "Ongeldige gebruikersnaam of wachtwoord.";
     }
-
-    $stmt->close();
 }
 
-$conn->close();
+$db->close();
 ?>
 
 <!DOCTYPE html>
