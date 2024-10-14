@@ -5,7 +5,7 @@ $gebruikersnaam = $_POST['gebruikersnaam'] ?? '';
 $wachtwoord = $_POST['wachtwoord'] ?? '';
 
 // Connect to the SQLite3 database
-$db = new SQLite3('/var/www/Go-pro/database.sqlite3');  // Update with the actual path to your .sqlite3 file
+$db = new SQLite3('database.sqlite3');  // Update with the actual path to your .sqlite3 file
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($gebruikersnaam) && !empty($wachtwoord)) {
     $sql = "SELECT gebruiker_id, wachtwoord FROM gebruikers WHERE gebruikersnaam = :gebruikersnaam";

@@ -1,6 +1,6 @@
 <?php
 // Connect to the SQLite3 database
-$db = new SQLite3('/var/www/Go-pro/database.sqlite3');  // Update with the actual path to your .sqlite3 file
+$db = new SQLite3('database.sqlite3');  // Update with the actual path to your .sqlite3 file
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get form data
