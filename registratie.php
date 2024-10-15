@@ -4,12 +4,18 @@ $db = new SQLite3('database.sqlite3');  // Update with the actual path to your .
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get form data
+    $voornaam = $_POST['voornaam'];
+    $achternaam = $_POST['achternaam'];
+    $email = $_POST['email'];
     $gebruikersnaam = $_POST['gebruikersnaam'];
     $wachtwoord = password_hash($_POST['wachtwoord'], PASSWORD_DEFAULT);
 
     // Insert user into database
-    $sql = "INSERT INTO gebruikers (gebruikersnaam, wachtwoord) VALUES (:gebruikersnaam, :wachtwoord)";
+    $sql = "INSERT INTO gebruikers (voornaam, achternaam, email, gebruikersnaam, wachtwoord) VALUES (:voornaam, :achternaam, :email, :gebruikersnaam, :wachtwoord)";
     $stmt = $db->prepare($sql);
+    $stmt->bindValue(':voornaam', $voornaam, SQLITE3_TEXT);
+    $stmt->bindValue(':achternaam', $achternaam, SQLITE3_TEXT);
+    $stmt->bindValue(':email', $email, SQLITE3_TEXT);
     $stmt->bindValue(':gebruikersnaam', $gebruikersnaam, SQLITE3_TEXT);
     $stmt->bindValue(':wachtwoord', $wachtwoord, SQLITE3_TEXT);
 
@@ -37,6 +43,18 @@ $db->close();
     <div class="container mt-5">
         <h2>Registreren</h2>
         <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+        <div class="form-group">
+                <label for="voornaam">Voornaam</label>
+                <input type="text" class="form-control" id="voornaam" name="voornaam" required>
+            </div>
+            <div class="form-group">
+                <label for="achternaam">Achternaam</label>
+                <input type="text" class="form-control" id="achternaam" name="achternaam" required>
+            </div>
+            <div class="form-group">
+                <label for="email">E-mailadres</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
             <div class="form-group">
                 <label for="gebruikersnaam">Gebruikersnaam</label>
                 <input type="text" class="form-control" id="gebruikersnaam" name="gebruikersnaam" required>
