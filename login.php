@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($gebruikersnaam) && !empty($w
             $_SESSION['gebruikersnaam'] = $gebruikersnaam;
             $_SESSION['gebruiker_id'] = $user['gebruiker_id'];
             $_SESSION['user_logged_in'] = 1;
-            header("Location: account.php");
+            header("Location: homepagina.php");
             exit();
         } else {
             $foutmelding = "Ongeldige gebruikersnaam of wachtwoord.";
