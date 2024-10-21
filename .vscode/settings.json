@@ -1,0 +1,10 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "database": "${workspaceFolder:Go-pro}/database.sqlite3",
+            "name": "go-pro-database"
+        }
+    ]
+}
