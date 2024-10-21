@@ -28,6 +28,7 @@ $gebruiker_id = $_SESSION['gebruiker_id'];
             <hr class="my-4">
             <p>Gebruiker ID: <?php echo $gebruiker_id; ?></p>
             <a class="btn btn-primary btn-lg" href="uitloggen.php" role="button">Uitloggen</a>
+            <a class="btn btn-secondary btn-lg" href="accountinstellingen.php" role="button">Account instellingen</a>
         </div>
     </div>
 
