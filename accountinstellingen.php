@@ -120,7 +120,7 @@ $conn->close();
 
             <!-- Meer instellingen knop -->
             <div class="mt-3">
-                <a href="meer_instellingen.php" class="btn btn-secondary">Meer instellingen...</a>
+                <a href="account.php" class="btn btn-secondary">Terug</a>
             </div>
         </div>
     </div>
