@@ -1,0 +1,1 @@
+Om de webapplicatie te installeren, moet je een programma hebben waarmee je een lokale omgeving op je laptop neerzet. Zodra je die hebt, moet je de naam van de webapplicatie invoeren samen met 'localhost'. Dan kun je de de webapplicatie zo bekijken.
